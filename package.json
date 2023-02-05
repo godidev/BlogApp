@@ -1,0 +1,22 @@
+{
+  "name": "blogapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "plugins": [
+    "cypress"
+  ],
+  "devDependencies": {
+    "eslint-plugin-cypress": "2.12.1"
+  },
+  "workspaces": [
+    "api",
+    "app"
+  ],
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

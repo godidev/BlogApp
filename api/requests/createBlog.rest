@@ -1,0 +1,12 @@
+POST /api/blogs/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkpvaG5Eb2UiLCJpZCI6IjYzYzVhNDM4YmEzY2FlY2RjYTVjZmEwYiIsImlhdCI6MTY3MzkwMjUxNn0.OIJy5g59-AI_PzYXABSDUkR2GOZSTTSmDl3zUDCL8ms
+Host: localhost:3005
+Content-Length: 127
+
+{
+	"title": "Second Blog",
+	"author": "John",
+	"url": "www.JohnDoe.com",
+	"likes": 288,
+}
