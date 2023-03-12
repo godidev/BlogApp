@@ -5,11 +5,17 @@ import loginService from './services/login'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
+import { useDispatch } from 'react-redux'
+import {
+  clearNotification,
+  changeNotification,
+} from './features/notification/notificationSlice'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [message, setMessage] = useState(null)
+
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const getBlogs = async () => {
@@ -55,17 +61,18 @@ const App = () => {
     try {
       const newBlog = await blogService.create({ title, author, url })
       setBlogs(prevBlogs => [...prevBlogs, newBlog])
-      setMessage({
-        color: 'green',
-        text: `A new blog ${title} by ${author} added`,
-      })
+      dispatch(
+        changeNotification({
+          color: 'green',
+          text: `A new blog ${title} by ${author} added`,
+        }),
+      )
     } catch (error) {
-      setMessage("Coultn't create blog")
+      dispatch(changeNotification("Coultn't create blog"))
     }
-    setTimeout(() => {
-      setMessage(null)
-    }, 3000)
+    setTimeout(() => dispatch(clearNotification()), 5000)
   }
+
   const updateBlog = async BlogToUpdate => {
     blogService.setToken(user.token)
     try {
@@ -77,22 +84,21 @@ const App = () => {
         ),
       )
 
-      setMessage({
-        color: 'green',
-        text: `Blog ${BlogToUpdate.title} was successfully updated`,
-      })
-
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      dispatch(
+        changeNotification({
+          color: 'green',
+          text: `Blog ${BlogToUpdate.title} was successfully updated`,
+        }),
+      )
+      setTimeout(() => dispatch(clearNotification()), 5000)
     } catch (exception) {
-      setMessage({
-        color: 'red',
-        text: `Cannot update blog ${BlogToUpdate.title}`,
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      dispatch(
+        changeNotification({
+          color: 'red',
+          text: `Cannot update blog ${BlogToUpdate.title}`,
+        }),
+      )
+      setTimeout(() => dispatch(clearNotification()), 5000)
     }
   }
 
@@ -101,20 +107,21 @@ const App = () => {
     try {
       await blogService.deleteBlog(id)
       setBlogs(blogs.filter(blog => blog.id !== id))
-      setMessage({
-        color: 'green',
-        text: 'Blog Deleted!',
-      })
+      dispatch(
+        changeNotification({
+          color: 'green',
+          text: 'Blog Deleted!',
+        }),
+      )
     } catch (error) {
-      setMessage({
-        color: 'red',
-        text: "Couldn't delete blog!",
-      })
-      console.log(error)
+      dispatch(
+        changeNotification({
+          color: 'red',
+          text: "Couldn't delete blog!",
+        }),
+      )
     }
-    setTimeout(() => {
-      setMessage(null)
-    }, 5000)
+    setTimeout(() => dispatch(clearNotification()), 5000)
   }
 
   if (!user) {
@@ -144,7 +151,7 @@ const App = () => {
     <StrictMode>
       <div>
         <h2>blogs</h2>
-        <Notification message={message} />
+        <Notification />
         <p>{user.username} logged in</p>
         <div>
           <button onClick={handleLogout}>Log Out</button>

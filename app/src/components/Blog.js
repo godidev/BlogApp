@@ -59,7 +59,6 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
 Blog.propTypes = {
   blog: PropTypes.object.isRequired,
   updateBlog: PropTypes.func.isRequired,
-  deleteBlog: PropTypes.func.isRequired,
 }
 
 export default Blog
