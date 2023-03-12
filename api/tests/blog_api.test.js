@@ -35,10 +35,10 @@ beforeEach(async () => {
   noBlogsToken = jwt.sign(userWithNoBlogsToken, process.env.SECRET)
 
   await Promise.all(
-    helper.initialBlogs.map((blog) => {
+    helper.initialBlogs.map(blog => {
       blog.user = rootUser.id
       return new Blog(blog).save()
-    })
+    }),
   )
 })
 
@@ -66,8 +66,7 @@ describe('Add blogs to database', () => {
     }
 
     await api.post('/api/blogs').send(newBlog).expect(401)
-  }
-  )
+  })
 
   test('can be added with a valid user token', async () => {
     const newBlog = {
@@ -88,11 +87,11 @@ describe('Add blogs to database', () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
   })
 
-  test('when request doesn\'t include likes', async () => {
+  test("when request doesn't include likes", async () => {
     const newBlog = {
       title: 'prueba',
       author: 'prueba',
-      url:'prueba',
+      url: 'prueba',
     }
 
     const response = await api
@@ -108,8 +107,8 @@ describe('Add blogs to database', () => {
     expect(response.body.likes).toBe(0)
   })
 
-  test('when request doesn\'t include title or url', async () => {
-    const newBlog ={
+  test("when request doesn't include title or url", async () => {
+    const newBlog = {
       author: 'prueba',
       likes: 24,
     }
@@ -146,7 +145,7 @@ describe('delete blogs from database', () => {
     const blogsAtEnd = await helper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
 
-    const blogsIds = blogsAtEnd.map((b) => b.id)
+    const blogsIds = blogsAtEnd.map(b => b.id)
     expect(blogsIds).not.toContain(blogToDelete.id)
   })
 })

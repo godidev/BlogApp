@@ -10,18 +10,18 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
     paddingLeft: 2,
     border: 'solid',
     borderWidth: 1,
-    marginBottom: 5
+    marginBottom: 5,
   }
 
-  function handleClick () {
+  function handleClick() {
     setVisible(prev => !prev)
   }
 
   const increaseLikes = () => {
-    const updatedBlog = ({
+    const updatedBlog = {
       ...blog,
-      likes: blog.likes + 1
-    })
+      likes: blog.likes + 1,
+    }
     updateBlog(updatedBlog)
     setBlogObject(updatedBlog)
   }
@@ -32,25 +32,34 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
   }
 
   return (
-    <div className='blog' style={ blogStyle }>
+    <div className='blog' style={blogStyle}>
       <p className='blogTitle'>
         {blog.title}
         <button onClick={handleClick}>{visible ? 'Hide' : 'View'}</button>
       </p>
-      {visible &&
+      {visible && (
         <div className='extendedBlog'>
-          <p>URL: <strong>{blog.url}</strong></p>
-          <p className='likes' data-cy='likeButton'>Likes: <strong>{blogObject.likes}</strong><button onClick={increaseLikes}>like</button></p>
-          <p>Author: <strong>{blog.author}</strong></p>
+          <p>
+            URL: <strong>{blog.url}</strong>
+          </p>
+          <p className='likes' data-cy='likeButton'>
+            Likes: <strong>{blogObject.likes}</strong>
+            <button onClick={increaseLikes}>like</button>
+          </p>
+          <p>
+            Author: <strong>{blog.author}</strong>
+          </p>
           {deleteBlog && <button onClick={handleDelete}>Remove</button>}
-        </div>}
-    </div>)
+        </div>
+      )}
+    </div>
+  )
 }
 
 Blog.propTypes = {
   blog: PropTypes.object.isRequired,
   updateBlog: PropTypes.func.isRequired,
-  deleteBlog: PropTypes.func.isRequired
+  deleteBlog: PropTypes.func.isRequired,
 }
 
 export default Blog

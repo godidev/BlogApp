@@ -9,12 +9,18 @@ const api = supertest(app)
 beforeEach(async () => {
   await User.deleteMany({})
 
-  const user = new User({ username: 'enigma69', name: 'Pedro', password: 'rotonda' })
+  const user = new User({
+    username: 'enigma69',
+    name: 'Pedro',
+    password: 'rotonda',
+  })
 
   await user.save()
 })
 
-afterEach(() => { server.close() })
+afterEach(() => {
+  server.close()
+})
 
 describe('when there is initially one user in db', () => {
   test('creation succeeds with a fresh username', async () => {

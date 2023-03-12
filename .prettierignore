@@ -1,0 +1,5 @@
+build
+node_modules
+app/cypress
+*-lock.json
+app/public

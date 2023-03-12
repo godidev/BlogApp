@@ -7,29 +7,21 @@ const blog = {
   title: 'Component testing is done with react-testing-library',
   url: 'www.asdf.com',
   author: 'Testing',
-  likes: 0
+  likes: 0,
 }
 
 describe('Blog component', () => {
   test('renders content without additional info', () => {
     const { container } = render(
-          <Blog
-              blog={blog}
-              deleteBlog={() => {}}
-              updateBlog={() => {}}
-          />)
+      <Blog blog={blog} deleteBlog={() => {}} updateBlog={() => {}} />,
+    )
 
     const title = container.querySelector('.blogTitle')
     expect(title).toHaveTextContent(blog.title)
   })
 
   test('renders additional info when clicking View', async () => {
-    render(
-        <Blog
-            blog={blog}
-            deleteBlog={() => {}}
-            updateBlog={() => {}}
-        />)
+    render(<Blog blog={blog} deleteBlog={() => {}} updateBlog={() => {}} />)
 
     expect(screen.getByText('View')).toBeInTheDocument()
     expect(screen.queryByText('Hide')).toBe(null)
@@ -40,12 +32,7 @@ describe('Blog component', () => {
   })
 
   test('clicking hide button hides additional info', async () => {
-    render(
-      <Blog
-          blog={blog}
-          deleteBlog={() => {}}
-          updateBlog={() => {}}
-      />)
+    render(<Blog blog={blog} deleteBlog={() => {}} updateBlog={() => {}} />)
 
     await userEvent.click(screen.getByText('View'))
     expect(screen.getByText('Hide')).toBeInTheDocument()
@@ -60,12 +47,7 @@ describe('Blog component', () => {
     const mockHandler = jest.fn()
     const user = userEvent.setup()
 
-    render(
-        <Blog
-            blog={blog}
-            deleteBlog={() => {}}
-            updateBlog={ mockHandler }
-        />)
+    render(<Blog blog={blog} deleteBlog={() => {}} updateBlog={mockHandler} />)
 
     await userEvent.click(screen.getByText('View'))
 

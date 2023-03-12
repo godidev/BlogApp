@@ -29,11 +29,12 @@ const App = () => {
     }
   }, [])
 
-  const handleLogin = async (userObject) => {
+  const handleLogin = async userObject => {
     const { username, password } = userObject
     try {
       const userLogin = await loginService.login({
-        username, password
+        username,
+        password,
       })
       window.localStorage.setItem('loggedUser', JSON.stringify(userLogin))
       setUser(userLogin)
@@ -47,7 +48,7 @@ const App = () => {
     setUser(null)
   }
 
-  const addBlog = async (blogObject) => {
+  const addBlog = async blogObject => {
     const { title, author, url } = blogObject
 
     blogService.setToken(user.token)
@@ -56,26 +57,29 @@ const App = () => {
       setBlogs(prevBlogs => [...prevBlogs, newBlog])
       setMessage({
         color: 'green',
-        text: `A new blog ${title} by ${author} added`
+        text: `A new blog ${title} by ${author} added`,
       })
     } catch (error) {
-      setMessage('Coultn\'t create blog')
+      setMessage("Coultn't create blog")
     }
     setTimeout(() => {
       setMessage(null)
     }, 3000)
   }
-  const updateBlog = async (BlogToUpdate) => {
+  const updateBlog = async BlogToUpdate => {
     blogService.setToken(user.token)
     try {
-      const updatedBlog = await blogService
-        .update(BlogToUpdate)
+      const updatedBlog = await blogService.update(BlogToUpdate)
       const { likes } = updatedBlog
-      setBlogs(blogs.map(blog => blog.id !== updatedBlog.id ? blog : { ...blog, likes }))
+      setBlogs(
+        blogs.map(blog =>
+          blog.id !== updatedBlog.id ? blog : { ...blog, likes },
+        ),
+      )
 
       setMessage({
         color: 'green',
-        text: `Blog ${BlogToUpdate.title} was successfully updated`
+        text: `Blog ${BlogToUpdate.title} was successfully updated`,
       })
 
       setTimeout(() => {
@@ -84,7 +88,7 @@ const App = () => {
     } catch (exception) {
       setMessage({
         color: 'red',
-        text: `Cannot update blog ${BlogToUpdate.title}`
+        text: `Cannot update blog ${BlogToUpdate.title}`,
       })
       setTimeout(() => {
         setMessage(null)
@@ -92,19 +96,19 @@ const App = () => {
     }
   }
 
-  const deleteBlog = async (id) => {
+  const deleteBlog = async id => {
     blogService.setToken(user.token)
     try {
       await blogService.deleteBlog(id)
       setBlogs(blogs.filter(blog => blog.id !== id))
       setMessage({
         color: 'green',
-        text: 'Blog Deleted!'
+        text: 'Blog Deleted!',
       })
     } catch (error) {
       setMessage({
         color: 'red',
-        text: 'Couldn\'t delete blog!'
+        text: "Couldn't delete blog!",
       })
       console.log(error)
     }
@@ -117,33 +121,36 @@ const App = () => {
     return (
       <>
         <h2>Log in to application</h2>
-        <LoginForm
-          handleLogin={handleLogin}/>
-        </>)
+        <LoginForm handleLogin={handleLogin} />
+      </>
+    )
   }
 
-  const renderBlogs = blogs.sort((a, b) => a.likes - b.likes).map(blog => {
-    const removeFromDB = (blog.user.id === user.id) ? deleteBlog : null
-    return (
-    <Blog
-      key={blog.id}
-      blog={blog}
-      updateBlog={updateBlog}
-      deleteBlog={removeFromDB}
-    />)
-  })
+  const renderBlogs = blogs
+    .sort((a, b) => a.likes - b.likes)
+    .map(blog => {
+      const removeFromDB = blog.user.id === user.id ? deleteBlog : null
+      return (
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateBlog={updateBlog}
+          deleteBlog={removeFromDB}
+        />
+      )
+    })
 
   return (
     <StrictMode>
       <div>
         <h2>blogs</h2>
-        <Notification message={message}/>
+        <Notification message={message} />
         <p>{user.username} logged in</p>
         <div>
           <button onClick={handleLogout}>Log Out</button>
         </div>
         {renderBlogs}
-        <BlogsForm addBlog={addBlog}/>
+        <BlogsForm addBlog={addBlog} />
       </div>
     </StrictMode>
   )

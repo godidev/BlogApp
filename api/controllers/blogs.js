@@ -21,7 +21,7 @@ blogsRouter.get('/:id', async (request, response) => {
     const id = request.params.id
     const blogs = await Blog.findById(id).populate('user')
     response.status(200).json(blogs)
-  } catch (error){
+  } catch (error) {
     response.status(404).end()
   }
 })
@@ -34,7 +34,7 @@ blogsRouter.post('/', async (request, response) => {
     const { title, author, url, likes = 0 } = body
 
     const token = getTokenFrom(request)
-    if (!token || !(jwt.verify(token, process.env.SECRET).id)) {
+    if (!token || !jwt.verify(token, process.env.SECRET).id) {
       return response.status(401).json({ error: 'token missing or invalid' })
     }
     const decodedToken = jwt.verify(token, process.env.SECRET)
@@ -46,7 +46,7 @@ blogsRouter.post('/', async (request, response) => {
       author,
       url,
       likes,
-      user: user._id
+      user: user._id,
     })
 
     const savedBlog = await blog.save()
@@ -59,7 +59,7 @@ blogsRouter.post('/', async (request, response) => {
 blogsRouter.delete('/:id', async (request, response) => {
   const id = request.params.id
   const token = getTokenFrom(request)
-  if (!token || !(jwt.verify(token, process.env.SECRET).id)) {
+  if (!token || !jwt.verify(token, process.env.SECRET).id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
   const decodedToken = jwt.verify(token, process.env.SECRET)
@@ -84,19 +84,19 @@ blogsRouter.put('/:id', async (request, response) => {
 
   const token = getTokenFrom(request)
 
-  if (!token || !(jwt.verify(token, process.env.SECRET).id)) {
+  if (!token || !jwt.verify(token, process.env.SECRET).id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
 
   const decodedToken = jwt.verify(token, process.env.SECRET)
   const user = await User.findById(decodedToken.id)
 
-  if ( user._id.toString() ) {
-    const blog = { title,author,url,likes, }
+  if (user._id.toString()) {
+    const blog = { title, author, url, likes }
     try {
       const updatedBlog = await Blog.findByIdAndUpdate(id, blog, { new: true })
       response.json(updatedBlog.toJSON())
-    } catch (error){
+    } catch (error) {
       response.status(400).end()
     }
   } else {

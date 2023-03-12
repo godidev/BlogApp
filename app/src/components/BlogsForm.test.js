@@ -6,7 +6,7 @@ import BlogsForm from './BlogsForm'
 describe('BlogsForm', () => {
   test('Renders the component and clicking add blog actualy works', async () => {
     const mockHandler = jest.fn()
-    render(<BlogsForm addBlog={ mockHandler }/>)
+    render(<BlogsForm addBlog={mockHandler} />)
 
     const button = screen.getByText('Create Blog')
 
@@ -21,7 +21,7 @@ describe('BlogsForm', () => {
   test('Returns valid data', async () => {
     const handleNewBlog = jest.fn()
 
-    const { container } = render(<BlogsForm addBlog={ handleNewBlog }/>)
+    const { container } = render(<BlogsForm addBlog={handleNewBlog} />)
 
     const title = container.querySelector('#title')
     const author = container.querySelector('#author')
@@ -29,13 +29,13 @@ describe('BlogsForm', () => {
     const form = container.querySelector('#form')
 
     fireEvent.change(title, {
-      target: { value: 'blog title' }
+      target: { value: 'blog title' },
     })
     fireEvent.change(author, {
-      target: { value: 'blog author' }
+      target: { value: 'blog author' },
     })
     fireEvent.change(url, {
-      target: { value: 'blog url' }
+      target: { value: 'blog url' },
     })
 
     fireEvent.submit(form)
