@@ -1,7 +1,6 @@
-import { useState, useEffect, StrictMode } from 'react'
+import { useEffect, StrictMode } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
-import loginService from './services/login'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
@@ -16,6 +15,7 @@ import {
   addBlogState,
   changeBlog,
 } from './features/blog/blogSlice'
+import { getUser, loginUser, logoutUser } from './features/user/userSlice'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -25,35 +25,28 @@ const App = () => {
   }, [dispatch])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedUser')
-    if (loggedUserJSON !== 'undefined') {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-    } else {
-      setUser(null)
-    }
-  }, [])
+    dispatch(getUser())
+  }, [dispatch])
 
   const blogs = useSelector(state => state.blogs)
-  const [user, setUser] = useState(null)
+  const user = useSelector(state => state.user)
 
   const handleLogin = async userObject => {
     const { username, password } = userObject
     try {
-      const userLogin = await loginService.login({
-        username,
-        password,
-      })
-      window.localStorage.setItem('loggedUser', JSON.stringify(userLogin))
-      setUser(userLogin)
+      dispatch(
+        loginUser({
+          username,
+          password,
+        }),
+      )
     } catch (error) {
       console.error(error)
     }
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedUser')
-    setUser(null)
+    dispatch(logoutUser())
   }
 
   const addBlog = async blogObject => {
