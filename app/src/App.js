@@ -1,51 +1,52 @@
-import { useState, useEffect, StrictMode } from 'react'
+import { useEffect, StrictMode } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
-import loginService from './services/login'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  clearNotification,
+  changeNotification,
+} from './features/notification/notificationSlice'
+import {
+  initializeBlogs,
+  deleteBlogState,
+  addBlogState,
+  changeBlog,
+} from './features/blog/blogSlice'
+import { getUser, loginUser, logoutUser } from './features/user/userSlice'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
-  const [message, setMessage] = useState(null)
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    const getBlogs = async () => {
-      const blogs = await blogService.getAll()
-      setBlogs(blogs)
-    }
-    getBlogs()
-  }, [])
+    dispatch(initializeBlogs())
+  }, [dispatch])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedUser')
-    if (loggedUserJSON !== 'undefined') {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-    } else {
-      setUser(null)
-    }
-  }, [])
+    dispatch(getUser())
+  }, [dispatch])
+
+  const blogs = useSelector(state => state.blogs)
+  const user = useSelector(state => state.user)
 
   const handleLogin = async userObject => {
     const { username, password } = userObject
     try {
-      const userLogin = await loginService.login({
-        username,
-        password,
-      })
-      window.localStorage.setItem('loggedUser', JSON.stringify(userLogin))
-      setUser(userLogin)
+      dispatch(
+        loginUser({
+          username,
+          password,
+        }),
+      )
     } catch (error) {
       console.error(error)
     }
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedUser')
-    setUser(null)
+    dispatch(logoutUser())
   }
 
   const addBlog = async blogObject => {
@@ -54,45 +55,40 @@ const App = () => {
     blogService.setToken(user.token)
     try {
       const newBlog = await blogService.create({ title, author, url })
-      setBlogs(prevBlogs => [...prevBlogs, newBlog])
-      setMessage({
-        color: 'green',
-        text: `A new blog ${title} by ${author} added`,
-      })
+      dispatch(addBlogState(newBlog))
+      dispatch(
+        changeNotification({
+          color: 'green',
+          text: `A new blog ${title} by ${author} added`,
+        }),
+      )
     } catch (error) {
-      setMessage("Coultn't create blog")
+      dispatch(changeNotification("Coultn't create blog"))
     }
-    setTimeout(() => {
-      setMessage(null)
-    }, 3000)
+    setTimeout(() => dispatch(clearNotification()), 5000)
   }
+
   const updateBlog = async BlogToUpdate => {
     blogService.setToken(user.token)
     try {
       const updatedBlog = await blogService.update(BlogToUpdate)
       const { likes } = updatedBlog
-      setBlogs(
-        blogs.map(blog =>
-          blog.id !== updatedBlog.id ? blog : { ...blog, likes },
-        ),
+      dispatch(changeBlog({ id: updatedBlog.id, likes }))
+      dispatch(
+        changeNotification({
+          color: 'green',
+          text: `Blog ${BlogToUpdate.title} was successfully updated`,
+        }),
       )
-
-      setMessage({
-        color: 'green',
-        text: `Blog ${BlogToUpdate.title} was successfully updated`,
-      })
-
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      setTimeout(() => dispatch(clearNotification()), 5000)
     } catch (exception) {
-      setMessage({
-        color: 'red',
-        text: `Cannot update blog ${BlogToUpdate.title}`,
-      })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      dispatch(
+        changeNotification({
+          color: 'red',
+          text: `Cannot update blog ${BlogToUpdate.title}`,
+        }),
+      )
+      setTimeout(() => dispatch(clearNotification()), 5000)
     }
   }
 
@@ -100,21 +96,22 @@ const App = () => {
     blogService.setToken(user.token)
     try {
       await blogService.deleteBlog(id)
-      setBlogs(blogs.filter(blog => blog.id !== id))
-      setMessage({
-        color: 'green',
-        text: 'Blog Deleted!',
-      })
+      dispatch(deleteBlogState(id))
+      dispatch(
+        changeNotification({
+          color: 'green',
+          text: 'Blog Deleted!',
+        }),
+      )
     } catch (error) {
-      setMessage({
-        color: 'red',
-        text: "Couldn't delete blog!",
-      })
-      console.log(error)
+      dispatch(
+        changeNotification({
+          color: 'red',
+          text: "Couldn't delete blog!",
+        }),
+      )
     }
-    setTimeout(() => {
-      setMessage(null)
-    }, 5000)
+    setTimeout(() => dispatch(clearNotification()), 5000)
   }
 
   if (!user) {
@@ -126,25 +123,28 @@ const App = () => {
     )
   }
 
-  const renderBlogs = blogs
-    .sort((a, b) => a.likes - b.likes)
-    .map(blog => {
-      const removeFromDB = blog.user.id === user.id ? deleteBlog : null
-      return (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          updateBlog={updateBlog}
-          deleteBlog={removeFromDB}
-        />
-      )
-    })
+  const renderBlogs =
+    Array.isArray(blogs) &&
+    blogs
+      .slice()
+      .sort((a, b) => a.likes - b.likes)
+      .map(blog => {
+        const removeFromDB = blog.user.id === user.id ? deleteBlog : null
+        return (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            updateBlog={updateBlog}
+            deleteBlog={removeFromDB}
+          />
+        )
+      })
 
   return (
     <StrictMode>
       <div>
         <h2>blogs</h2>
-        <Notification message={message} />
+        <Notification />
         <p>{user.username} logged in</p>
         <div>
           <button onClick={handleLogout}>Log Out</button>
