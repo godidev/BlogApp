@@ -5,25 +5,24 @@ import loginService from './services/login'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   clearNotification,
   changeNotification,
 } from './features/notification/notificationSlice'
+import {
+  initializeBlogs,
+  deleteBlogState,
+  addBlogState,
+  changeBlog,
+} from './features/blog/blogSlice'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
-
   const dispatch = useDispatch()
 
   useEffect(() => {
-    const getBlogs = async () => {
-      const blogs = await blogService.getAll()
-      setBlogs(blogs)
-    }
-    getBlogs()
-  }, [])
+    dispatch(initializeBlogs())
+  }, [dispatch])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -34,6 +33,9 @@ const App = () => {
       setUser(null)
     }
   }, [])
+
+  const blogs = useSelector(state => state.blogs)
+  const [user, setUser] = useState(null)
 
   const handleLogin = async userObject => {
     const { username, password } = userObject
@@ -60,7 +62,7 @@ const App = () => {
     blogService.setToken(user.token)
     try {
       const newBlog = await blogService.create({ title, author, url })
-      setBlogs(prevBlogs => [...prevBlogs, newBlog])
+      dispatch(addBlogState(newBlog))
       dispatch(
         changeNotification({
           color: 'green',
@@ -78,12 +80,7 @@ const App = () => {
     try {
       const updatedBlog = await blogService.update(BlogToUpdate)
       const { likes } = updatedBlog
-      setBlogs(
-        blogs.map(blog =>
-          blog.id !== updatedBlog.id ? blog : { ...blog, likes },
-        ),
-      )
-
+      dispatch(changeBlog({ id: updatedBlog.id, likes }))
       dispatch(
         changeNotification({
           color: 'green',
@@ -106,7 +103,7 @@ const App = () => {
     blogService.setToken(user.token)
     try {
       await blogService.deleteBlog(id)
-      setBlogs(blogs.filter(blog => blog.id !== id))
+      dispatch(deleteBlogState(id))
       dispatch(
         changeNotification({
           color: 'green',
@@ -133,19 +130,22 @@ const App = () => {
     )
   }
 
-  const renderBlogs = blogs
-    .sort((a, b) => a.likes - b.likes)
-    .map(blog => {
-      const removeFromDB = blog.user.id === user.id ? deleteBlog : null
-      return (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          updateBlog={updateBlog}
-          deleteBlog={removeFromDB}
-        />
-      )
-    })
+  const renderBlogs =
+    Array.isArray(blogs) &&
+    blogs
+      .slice()
+      .sort((a, b) => a.likes - b.likes)
+      .map(blog => {
+        const removeFromDB = blog.user.id === user.id ? deleteBlog : null
+        return (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            updateBlog={updateBlog}
+            deleteBlog={removeFromDB}
+          />
+        )
+      })
 
   return (
     <StrictMode>
