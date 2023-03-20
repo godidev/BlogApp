@@ -1,14 +1,11 @@
-import { useEffect, StrictMode } from 'react'
+import { useEffect, StrictMode, useContext } from 'react'
+import NotificationContext from './context/NotificationContext'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  clearNotification,
-  changeNotification,
-} from './features/notification/notificationSlice'
 import {
   initializeBlogs,
   deleteBlogState,
@@ -18,6 +15,7 @@ import {
 import { getUser, loginUser, logoutUser } from './features/user/userSlice'
 
 const App = () => {
+  const [, setNotification] = useContext(NotificationContext)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -56,16 +54,20 @@ const App = () => {
     try {
       const newBlog = await blogService.create({ title, author, url })
       dispatch(addBlogState(newBlog))
-      dispatch(
-        changeNotification({
+      setNotification({
+        type: 'set',
+        payload: {
           color: 'green',
           text: `A new blog ${title} by ${author} added`,
-        }),
-      )
+        },
+      })
     } catch (error) {
-      dispatch(changeNotification("Coultn't create blog"))
+      setNotification({
+        type: 'set',
+        payload: { text: "Coultn't create blog" },
+      })
     }
-    setTimeout(() => dispatch(clearNotification()), 5000)
+    setTimeout(() => setNotification({ type: 'clear' }), 5000)
   }
 
   const updateBlog = async BlogToUpdate => {
@@ -74,21 +76,26 @@ const App = () => {
       const updatedBlog = await blogService.update(BlogToUpdate)
       const { likes } = updatedBlog
       dispatch(changeBlog({ id: updatedBlog.id, likes }))
-      dispatch(
-        changeNotification({
+
+      setNotification({
+        type: 'set',
+        payload: {
           color: 'green',
           text: `Blog ${BlogToUpdate.title} was successfully updated`,
-        }),
-      )
-      setTimeout(() => dispatch(clearNotification()), 5000)
+        },
+      })
+
+      setTimeout(() => setNotification({ type: 'clear' }), 5000)
     } catch (exception) {
-      dispatch(
-        changeNotification({
+      setNotification({
+        type: 'set',
+        payload: {
           color: 'red',
           text: `Cannot update blog ${BlogToUpdate.title}`,
-        }),
-      )
-      setTimeout(() => dispatch(clearNotification()), 5000)
+        },
+      })
+
+      setTimeout(() => setNotification({ type: 'clear' }), 5000)
     }
   }
 
@@ -97,21 +104,24 @@ const App = () => {
     try {
       await blogService.deleteBlog(id)
       dispatch(deleteBlogState(id))
-      dispatch(
-        changeNotification({
+
+      setNotification({
+        type: 'set',
+        payload: {
           color: 'green',
           text: 'Blog Deleted!',
-        }),
-      )
+        },
+      })
     } catch (error) {
-      dispatch(
-        changeNotification({
+      setNotification({
+        type: 'set',
+        payload: {
           color: 'red',
           text: "Couldn't delete blog!",
-        }),
-      )
+        },
+      })
     }
-    setTimeout(() => dispatch(clearNotification()), 5000)
+    setTimeout(() => setNotification({ type: 'clear' }), 5000)
   }
 
   if (!user) {
