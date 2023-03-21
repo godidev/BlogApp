@@ -1,32 +1,57 @@
 import { useEffect, StrictMode, useContext } from 'react'
 import NotificationContext from './context/NotificationContext'
+import { useQuery, useMutation, useQueryClient } from 'react-query'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  initializeBlogs,
-  deleteBlogState,
-  addBlogState,
-  changeBlog,
-} from './features/blog/blogSlice'
 import { getUser, loginUser, logoutUser } from './features/user/userSlice'
 
 const App = () => {
+  const queryClient = useQueryClient()
+
+  const result = useQuery('blogs', blogService.getAll)
+
+  const newUpdateBlogMutation = useMutation(
+    updatedBlog => blogService.update(updatedBlog),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('blogs')
+      },
+    },
+  )
+
+  const newCreateBlogMutation = useMutation(
+    newBlog => blogService.create(newBlog),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('blogs')
+      },
+    },
+  )
+
+  const newDeleteBlogMutation = useMutation(
+    deletedBlog => blogService.deleteBlog(deletedBlog),
+    {
+      onSuccess: () => {
+        queryClient.getQueryData('blogs')
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries('blogs')
+      },
+    },
+  )
+
   const [, setNotification] = useContext(NotificationContext)
   const dispatch = useDispatch()
-
-  useEffect(() => {
-    dispatch(initializeBlogs())
-  }, [dispatch])
 
   useEffect(() => {
     dispatch(getUser())
   }, [dispatch])
 
-  const blogs = useSelector(state => state.blogs)
+  const blogs = result.data
   const user = useSelector(state => state.user)
 
   const handleLogin = async userObject => {
@@ -52,8 +77,7 @@ const App = () => {
 
     blogService.setToken(user.token)
     try {
-      const newBlog = await blogService.create({ title, author, url })
-      dispatch(addBlogState(newBlog))
+      newCreateBlogMutation.mutate({ title, author, url }, { important: true })
       setNotification({
         type: 'set',
         payload: {
@@ -73,9 +97,7 @@ const App = () => {
   const updateBlog = async BlogToUpdate => {
     blogService.setToken(user.token)
     try {
-      const updatedBlog = await blogService.update(BlogToUpdate)
-      const { likes } = updatedBlog
-      dispatch(changeBlog({ id: updatedBlog.id, likes }))
+      newUpdateBlogMutation.mutate(BlogToUpdate, { important: true })
 
       setNotification({
         type: 'set',
@@ -94,7 +116,6 @@ const App = () => {
           text: `Cannot update blog ${BlogToUpdate.title}`,
         },
       })
-
       setTimeout(() => setNotification({ type: 'clear' }), 5000)
     }
   }
@@ -102,8 +123,7 @@ const App = () => {
   const deleteBlog = async id => {
     blogService.setToken(user.token)
     try {
-      await blogService.deleteBlog(id)
-      dispatch(deleteBlogState(id))
+      newDeleteBlogMutation.mutate(id, { important: true })
 
       setNotification({
         type: 'set',
