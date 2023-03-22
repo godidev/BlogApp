@@ -7,6 +7,8 @@ import blogService from './services/blogs'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import User from './components/Users'
 
 const App = () => {
   const queryClient = useQueryClient()
@@ -159,18 +161,23 @@ const App = () => {
       })
 
   return (
-    <StrictMode>
-      <div>
-        <h2>blogs</h2>
-        <Notification />
-        <p>{user.username} logged in</p>
+    <Router>
+      <StrictMode>
         <div>
-          <button onClick={handleLogout}>Log Out</button>
+          <h2>blogs</h2>
+          <Notification />
+          <p>{user.username} logged in</p>
+          <div>
+            <button onClick={handleLogout}>Log Out</button>
+          </div>
+          <Routes>
+            <Route path='/users' element={<User />}></Route>
+            <Route path='/' element={renderBlogs}></Route>
+          </Routes>
+          <BlogsForm addBlog={addBlog} />
         </div>
-        {renderBlogs}
-        <BlogsForm addBlog={addBlog} />
-      </div>
-    </StrictMode>
+      </StrictMode>
+    </Router>
   )
 }
 
