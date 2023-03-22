@@ -1,13 +1,12 @@
-import { useEffect, StrictMode, useContext } from 'react'
+import { StrictMode, useContext, useEffect } from 'react'
 import NotificationContext from './context/NotificationContext'
+import UserContext, { loginUser } from './context/UserContext'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
-import { useDispatch, useSelector } from 'react-redux'
-import { getUser, loginUser, logoutUser } from './features/user/userSlice'
 
 const App = () => {
   const queryClient = useQueryClient()
@@ -45,31 +44,20 @@ const App = () => {
   )
 
   const [, setNotification] = useContext(NotificationContext)
-  const dispatch = useDispatch()
+  const [user, dispatch] = useContext(UserContext)
 
   useEffect(() => {
-    dispatch(getUser())
-  }, [dispatch])
+    dispatch({ type: 'getUser' })
+  }, [])
 
   const blogs = result.data
-  const user = useSelector(state => state.user)
 
   const handleLogin = async userObject => {
-    const { username, password } = userObject
-    try {
-      dispatch(
-        loginUser({
-          username,
-          password,
-        }),
-      )
-    } catch (error) {
-      console.error(error)
-    }
+    dispatch(await loginUser(userObject))
   }
 
   const handleLogout = () => {
-    dispatch(logoutUser())
+    dispatch({ type: 'logoutUser' })
   }
 
   const addBlog = async blogObject => {

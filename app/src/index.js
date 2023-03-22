@@ -1,20 +1,16 @@
 import ReactDOM from 'react-dom/client'
 import App from './App'
-import store from './app/store'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { Provider } from 'react-redux'
-import { NotificationContextProvider } from './context/NotificationContext'
+import { UserContextProvider } from './context/UserContext'
 
 const queryClient = new QueryClient()
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
 root.render(
-  <Provider store={store}>
-    <QueryClientProvider client={queryClient}>
-      <NotificationContextProvider>
-        <App />
-      </NotificationContextProvider>
-    </QueryClientProvider>
-  </Provider>,
+  <QueryClientProvider client={queryClient}>
+    <UserContextProvider>
+      <App />
+    </UserContextProvider>
+  </QueryClientProvider>,
 )
