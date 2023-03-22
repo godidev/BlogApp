@@ -1,27 +1,26 @@
-import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
-function User() {
-  const [users, setUsers] = useState([])
-
-  useEffect(() => {
-    axios.get('http://localhost:3005/api/users').then(res => setUsers(res.data))
-  }, [])
-
+function User({ users }) {
   return (
     <table>
-      <tr>
-        <td></td>
-        <th>Blogs created</th>
-      </tr>
-      {users.map(user => {
-        return (
-          <tr key={user.username}>
-            <td>{user.username}</td>
-            <td>{user.blogs.length}</td>
-          </tr>
-        )
-      })}
+      <thead>
+        <tr>
+          <td></td>
+          <th>Blogs created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map(user => {
+          return (
+            <tr key={user.username}>
+              <td>
+                <Link to={`/users/${user.id}`}>{user.username}</Link>
+              </td>
+              <td>{user.blogs.length}</td>
+            </tr>
+          )
+        })}
+      </tbody>
     </table>
   )
 }

@@ -1,4 +1,4 @@
-import { StrictMode, useContext, useEffect } from 'react'
+import { StrictMode, useContext, useEffect, useState } from 'react'
 import NotificationContext from './context/NotificationContext'
 import UserContext, { loginUser } from './context/UserContext'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
@@ -7,8 +7,10 @@ import blogService from './services/blogs'
 import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
 import BlogsForm from './components/BlogsForm'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import User from './components/Users'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Users from './components/Users'
+import User from './components/User'
+import axios from 'axios'
 
 const App = () => {
   const queryClient = useQueryClient()
@@ -47,6 +49,11 @@ const App = () => {
 
   const [, setNotification] = useContext(NotificationContext)
   const [user, dispatch] = useContext(UserContext)
+  const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    axios.get('http://localhost:3005/api/users').then(res => setUsers(res.data))
+  }, [])
 
   useEffect(() => {
     dispatch({ type: 'getUser' })
@@ -171,8 +178,9 @@ const App = () => {
             <button onClick={handleLogout}>Log Out</button>
           </div>
           <Routes>
-            <Route path='/users' element={<User />}></Route>
             <Route path='/' element={renderBlogs}></Route>
+            <Route path='/users' element={<Users users={users} />}></Route>
+            <Route path='/users/:id' element={<User users={users} />}></Route>
           </Routes>
           <BlogsForm addBlog={addBlog} />
         </div>
