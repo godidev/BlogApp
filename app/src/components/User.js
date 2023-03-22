@@ -2,12 +2,13 @@ import { useParams } from 'react-router-dom'
 
 function User({ users }) {
   const id = useParams().id
-  const { blogs } = users.find(user => user.id === id)
+  const user = users.find(user => user.id === id)
 
-  console.log({ blogs })
+  if (!user) return null
+
   return (
     <>
-      {blogs.map(blog => (
+      {user.blogs.map(blog => (
         <p key={blog.id}>{blog.title}</p>
       ))}
     </>
