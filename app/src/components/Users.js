@@ -15,7 +15,6 @@ function User() {
         <th>Blogs created</th>
       </tr>
       {users.map(user => {
-        console.log(user)
         return (
           <tr key={user.username}>
             <td>{user.username}</td>
